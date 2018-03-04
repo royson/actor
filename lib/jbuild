@@ -20,7 +20,7 @@
 
   (libraries (
     dolog
-    zmq
+    ZMQ
     ocamlgraph
     owl
    )

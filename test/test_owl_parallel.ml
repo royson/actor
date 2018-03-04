@@ -87,9 +87,36 @@ let test_param () =
 module M2 = Owl_neural_parallel.Make (Owl.Neural.S.Graph) (Actor.Param)
 let test_neural_parallel () =
   let open Owl.Neural.S in
+  let open Owl.Algodiff.S in
   let open Graph in
+  let open Owl.Plot in
   let nn =
-    input [|32;32;3|]
+    input [|28;28;1|]
+    |> flatten 
+    |> linear 256 ~act_typ:Activation.Tanh
+    |> linear 128 ~act_typ:Activation.Relu
+    |> linear 10 ~act_typ:Activation.Softmax
+    |> get_network
+
+(*     |> conv2d [|3;3;1;32|] [|1;1|] ~act_typ:Activation.Relu
+    |> conv2d [|3;3;32;64|] [|1;1|] ~act_typ:Activation.Relu
+    |> max_pool2d [|2;2|] [|2;2|]
+    |> dropout 0.5
+    |> flatten
+    |> linear 128 ~act_typ:Activation.Relu
+    |> normalisation
+    |> dropout 0.5
+    |> linear 10 ~act_typ:Activation.Softmax
+    |> get_network *)
+
+(*     |> lambda (fun x -> Maths.(x / F 256.))
+    |> conv2d [|5;5;1;32|] [|1;1|] ~act_typ:Activation.Relu
+    |> max_pool2d [|2;2|] [|2;2|]
+    |> dropout 0.1
+    |> fully_connected 1024 ~act_typ:Activation.Relu
+    |> linear 10 ~act_typ:Activation.Softmax
+    |> get_network *)
+(*     input [|32;32;3|]
     |> normalisation ~decay:0.9
     |> conv2d [|3;3;3;32|] [|1;1|] ~act_typ:Activation.Relu
     |> conv2d [|3;3;32;32|] [|1;1|] ~act_typ:Activation.Relu ~padding:VALID
@@ -101,24 +128,48 @@ let test_neural_parallel () =
     |> dropout 0.1
     |> fully_connected 512 ~act_typ:Activation.Relu
     |> linear 10 ~act_typ:Activation.Softmax
-    |> get_network
+    |> get_network *)
   in
 
-  let x, _, y = Owl.Dataset.load_cifar_train_data 1 in
+  (* let x, _, y = Owl.Dataset.load_cifar_train_data 1 in *)
+  let x, _, y = Owl.Dataset.load_mnist_train_data_arr () in
+
   (*
   let params = Params.config
     ~batch:(Batch.Mini 100) ~learning_rate:(Learning_Rate.Adagrad 0.002) 0.05 in
   *)
   let chkpt state =
-    if Checkpoint.(state.current_batch mod 1 = 0) then (
-      Checkpoint.(state.stop <- true);
+    if Checkpoint.(state.current_batch mod (state.batches - 1) = 0) then (
+      Log.info "Plotting loss function..";   
+      let z = Array.map unpack_flt state.loss in
+      let c = Array.sub z 0 state.batches in 
+      (* Array.map (Owl_log.info "%.6f") c; *)
+
+      let h = create "dist_mnist_adagrad_0.001.png" in
+      let f x = c.(Maths.(pack_flt x - F 1.) |> unpack_flt |> int_of_float) in
+      let x_range = Maths.(F (float_of_int (Array.length c)) - F 1.) in
+      let y_range arr = Array.fold_left Pervasives.max arr.(0) arr |> Pervasives.(+.) in
+      set_foreground_color h 0 0 0;
+      set_background_color h 255 255 255;
+      set_title h "Distributed mnist Adagrad 0.001 (2 Workers)";
+      set_xrange h 0. (unpack_flt Maths.(x_range + F 10.));
+      set_yrange h 0. (y_range c 2.0);
+      set_xlabel h "Batch";
+      set_ylabel h "Loss";
+      set_font_size h 8.;
+      set_pen_size h 3.;
+
+      plot_fun ~h f 1. (unpack_flt x_range);
+
+      output h;
       (* Log.info "sync model with server" *)
+      (* Checkpoint.(state.stop <- true); *)
     )
   in
 
   let params = Params.config
     ~batch:(Batch.Sample 100) ~learning_rate:(Learning_Rate.Adagrad 0.001)
-    ~checkpoint:(Checkpoint.Custom chkpt) ~stopping:(Stopping.Const 1e-6) 10.
+    ~checkpoint:(Checkpoint.Custom chkpt) ~stopping:(Stopping.Const 1e-6) 0.1
   in
   let url = Actor_config.manager_addr in
   let jid = Sys.argv.(1) in
