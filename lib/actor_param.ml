@@ -71,7 +71,7 @@ let worker_num () =
 let set_finish b =
   match Actor_paramserver.(!_context.job_id) = "" with
   | true  -> failwith "client never finishes"
-  | false -> Actor_paramserver.(!_context.finish = b)
+  | false -> Actor_paramserver.(!_context.finish <- b)
 
 let get_finish () =
   match Actor_paramserver.(!_context.job_id) = "" with
