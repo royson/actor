@@ -26,7 +26,7 @@ val register_schedule : ('a, 'b, 'c) ps_schedule_typ -> unit
 val register_pull : ('a, 'b, 'c) ps_pull_typ -> unit
 (** register user-defined pull function executed at master *)
 
-val register_push : ('a, 'b, 'c) ps_push_typ -> unit
+val register_push : ('a, 'b, 'c, 'd) ps_push_typ -> unit
 (** register user-defined push function executed at worker *)
 
 val register_stop : ps_stop_typ -> unit

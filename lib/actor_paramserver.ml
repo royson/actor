@@ -22,9 +22,15 @@ let _stop = ref (Marshal.to_string _default_stop [ Marshal.Closures ])
 let _default_barrier = Actor_barrier.param_bsp
 let _barrier = ref (Marshal.to_string _default_barrier [ Marshal.Closures ])
 
+let update_completion w = 
+  !_context.finish <- (!_context.finish + 1);
+  Hashtbl.replace !_context.worker_busy w 2
+  (* To do. change update_steps *)
+
 let update_steps t w =
+  (* Update steps for unfinished worker *)
   let t' = Hashtbl.find !_context.worker_step w in
-  match t > t' with
+  match t > t' && Hashtbl.find !_context.worker_busy w = 1 with
   | true  -> (
     Hashtbl.replace !_context.worker_busy w 0;
     Hashtbl.replace !_context.worker_step w t;
@@ -57,13 +63,17 @@ let service_loop () =
   let schedule : ('a, 'b, 'c) ps_schedule_typ = Marshal.from_string !_schedule 0 in
   let pull : ('a, 'b, 'c) ps_pull_typ = Marshal.from_string !_pull 0 in
   let barrier : ps_barrier_typ = Marshal.from_string !_barrier 0 in
-  let stop : ps_stop_typ = Marshal.from_string !_stop 0 in
+  (* let stop : ps_stop_typ = Marshal.from_string !_stop 0 in *)
   (* loop to process messages *)
-  try while not (stop _context) do
+  (* try while not (stop _context) do *)
+  (* TODO: Hotfix for stop. Remove *)
+  try while not (!_context.finish = (StrMap.cardinal !_context.workers)) do   
     (* synchronisation barrier check *)
     let t, passed = barrier _context in !_context.step <- t;
     (* schecule the passed at every message arrival *)
-    let tasks = schedule passed in
+    let tasks' = schedule passed in
+    (* Remove workers who have completed their task *)
+    let tasks = List.filter (fun (worker, _) -> Hashtbl.find !_context.worker_busy worker < 2) tasks' in
     List.iter (fun (worker, task) ->
       let w = StrMap.find worker !_context.workers in
       let s = Marshal.to_string task [] in
@@ -95,6 +105,10 @@ let service_loop () =
       let updates = Marshal.from_string m.par.(0) 0 |> pull in
       List.iter (fun (k,v) -> _set k v t) updates;
       update_steps t i
+      )
+    | PS_Finish -> (
+      Actor_logger.debug "%s: ps_finish" !_context.myself_addr;
+      update_completion i
       )
     | _ -> ( Actor_logger.debug "unknown mssage to PS" )
   done with Failure e -> (

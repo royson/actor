@@ -20,6 +20,9 @@ let _set k v t =
   let v' = Marshal.to_string v [] in
   Actor_utils.send ~bar:t !_context.master_sock PS_Set [|k'; v'|]
 
+let finish t =
+  Actor_utils.send ~bar:t !_context.master_sock PS_Finish [||]
+
 let update_param x t =
   (* update multiple kvs, more efficient than set *)
   let x' = Marshal.to_string x [] in
@@ -28,7 +31,7 @@ let update_param x t =
 let service_loop () =
   Actor_logger.debug "parameter worker @ %s" !_context.myself_addr;
   (* unmarshal the push function *)
-  let push : 'a -> ('b * 'c) list -> ('b * 'c) list = Marshal.from_string !_push 0 in
+  let push : 'a -> ('b * 'c) list -> (('b * 'c) list * 'd) = Marshal.from_string !_push 0 in
   (* loop to process messages *)
   try while true do
     let _i, m = Actor_utils.recv !_context.myself_sock in
@@ -38,11 +41,16 @@ let service_loop () =
       Actor_logger.debug "%s: ps_schedule" !_context.myself_addr;
       !_context.step <- (if t > !_context.step then t else !_context.step);
       let vars = Marshal.from_string m.par.(0) 0 in
-      let updates = push !_context.myself_addr vars in
-      update_param updates t
+      let (updates, fin) = push !_context.myself_addr vars in
+      
+      (* Indicate training ended. *)
+      if fin = true then 
+        finish t
+      else
+        update_param updates t      
       )
     | Terminate -> (
-      Actor_logger.debug "%s: terminate"!_context.myself_addr;
+      Actor_logger.debug "%s: terminate" !_context.myself_addr;
       Actor_utils.send ~bar:t !_context.master_sock OK [||];
       Unix.sleep 1; (* FIXME: sleep ... *)
       failwith ("#" ^ !_context.job_id ^ " terminated")

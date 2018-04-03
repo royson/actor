@@ -18,7 +18,7 @@ type message_type =
   | JoinTask | FlattenTask | ApplyTask | NopTask
   | Pipeline | Collect | Count | Broadcast | Fold | Reduce | Terminate | Load | Save
   (* Model Parallel: Param *)
-  | PS_Get | PS_Set | PS_Schedule | PS_Push
+  | PS_Get | PS_Set | PS_Schedule | PS_Push | PS_Finish
   (* P2P Parallel: Peer *)
   | P2P_Reg | P2P_Connect | P2P_Ping | P2P_Join | P2P_Forward | P2P_Set | P2P_Get
   | P2P_Get_Q | P2P_Get_R | P2P_Copy | P2P_Push | P2P_Pull | P2P_Pull_Q | P2P_Pull_R
@@ -52,6 +52,7 @@ type param_context = {
   mutable workers     : [`Dealer] ZMQ.Socket.t StrMap.t;  (* socket of workers or peers *)
   mutable step        : int;                              (* local step for barrier control *)
   mutable stale       : int;                              (* staleness variable for barrier control *)
+  mutable finish      : int;                              (* variable for no of completed workers *)
   mutable worker_busy : (string, int) Hashtbl.t;          (* lookup table of a worker busy or not *)
   mutable worker_step : (string, int) Hashtbl.t;          (* lookup table of a worker's step *)
   mutable step_worker : (int, string) Hashtbl.t;          (* lookup table of workers at a specific step *)
@@ -94,7 +95,7 @@ type ('a, 'b, 'c) ps_schedule_typ = 'a list -> ('a * ('b * 'c) list) list
 
 type ('a, 'b, 'c) ps_pull_typ = ('a * 'b) list -> ('a * 'c) list
 
-type ('a, 'b, 'c) ps_push_typ = 'a -> ('b * 'c) list -> ('b * 'c) list
+type ('a, 'b, 'c, 'd) ps_push_typ = 'a -> ('b * 'c) list -> (('b * 'c) list * 'd)
 
 type ps_barrier_typ = param_context ref -> int * (string list)
 
