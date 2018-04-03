@@ -55,7 +55,7 @@ let service_loop () =
   Actor_logger.debug "parameter server @ %s" !_context.myself_addr;
   (* unmarshal the schedule and pull functions *)
   let schedule : ('a, 'b, 'c) ps_schedule_typ = Marshal.from_string !_schedule 0 in
-  let pull : ('a, 'b, 'c) ps_pull_typ = Marshal.from_string !_pull 0 in
+  let pull : ('a, 'b, 'c, 'd) ps_pull_typ = Marshal.from_string !_pull 0 in
   let barrier : ps_barrier_typ = Marshal.from_string !_barrier 0 in
   let stop : ps_stop_typ = Marshal.from_string !_stop 0 in
   (* loop to process messages *)
@@ -92,7 +92,7 @@ let service_loop () =
       )
     | PS_Push -> (
       Actor_logger.debug "%s: ps_push" !_context.myself_addr;
-      let updates = Marshal.from_string m.par.(0) 0 |> pull in
+      let updates = Marshal.from_string m.par.(0) 0 |> (pull _context) in
       List.iter (fun (k,v) -> _set k v t) updates;
       update_steps t i
       )

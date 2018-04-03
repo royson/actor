@@ -75,6 +75,7 @@ let empty_param_context () =
     workers     = StrMap.empty;
     step        = 0;
     stale       = 1;
+    finish      = false;
     worker_busy = Hashtbl.create 1_000;
     worker_step = Hashtbl.create 1_000;
     step_worker = Hashtbl.create 1_000;
