@@ -67,13 +67,3 @@ let worker_num () =
   match Actor_paramserver.(!_context.job_id) = "" with
   | true  -> failwith "actor_param:worker_num"
   | false -> StrMap.cardinal Actor_paramserver.(!_context.workers)
-
-let set_finish b =
-  match Actor_paramserver.(!_context.job_id) = "" with
-  | true  -> failwith "client never finishes"
-  | false -> Actor_paramserver.(!_context.finish <- b)
-
-let get_finish () =
-  match Actor_paramserver.(!_context.job_id) = "" with
-  | true  -> failwith "client never finishes"
-  | false -> Actor_paramserver.(!_context.finish)

@@ -93,7 +93,7 @@ type service_rec = {
 
 type ('a, 'b, 'c) ps_schedule_typ = 'a list -> ('a * ('b * 'c) list) list
 
-type ('a, 'b, 'c, 'd) ps_pull_typ = param_context ref -> ('a * ('b * 'c)) list -> ('a * 'd) list
+type ('a, 'b, 'c, 'd) ps_pull_typ = ('a * ('b * 'c)) list -> ('a * 'd) list
 
 type ('a, 'b, 'c, 'd, 'e) ps_push_typ = 'a -> ('b * 'c) list -> ('b * ('d * 'e)) list
 

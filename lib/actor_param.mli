@@ -43,9 +43,3 @@ val keys : unit -> 'a list
 
 val worker_num : unit -> int
 (** return the number of workders, only work at server side *)
-
-val set_finish : bool -> unit
-(** set the finish parameter in context **)
-
-val get_finish : unit -> bool
-(** get the finish parameter in context to determine if parameter server should stop **)

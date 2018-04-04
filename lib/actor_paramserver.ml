@@ -92,7 +92,7 @@ let service_loop () =
       )
     | PS_Push -> (
       Actor_logger.debug "%s: ps_push" !_context.myself_addr;
-      let updates = Marshal.from_string m.par.(0) 0 |> (pull _context) in
+      let updates = Marshal.from_string m.par.(0) 0 |> pull in
       List.iter (fun (k,v) -> _set k v t) updates;
       update_steps t i
       )
