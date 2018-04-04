@@ -42,10 +42,10 @@ let register_barrier (f : ps_barrier_typ) =
 let register_schedule (f : ('a, 'b, 'c) ps_schedule_typ) =
   Actor_paramserver._schedule := Marshal.to_string f [ Marshal.Closures ]
 
-let register_pull (f : ('a, 'b, 'c) ps_pull_typ) =
+let register_pull (f : ('a, 'b, 'c, 'd) ps_pull_typ) =
   Actor_paramserver._pull := Marshal.to_string f [ Marshal.Closures ]
 
-let register_push (f : ('a, 'b, 'c, 'd) ps_push_typ) =
+let register_push (f : ('a, 'b, 'c, 'd, 'e) ps_push_typ) =
   Actor_paramclient._push := Marshal.to_string f [ Marshal.Closures ]
 
 let register_stop (f : ps_stop_typ) =
