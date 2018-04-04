@@ -87,8 +87,36 @@ let test_param () =
 module M2 = Owl_neural_parallel.Make (Owl.Neural.S.Graph) (Actor.Param)
 let test_neural_parallel () =
   let open Owl.Neural.S in
+  (* let open Owl.Algodiff.S in *)
   let open Graph in
+  (* let open Owl.Plot in *)
   let nn =
+    (* input [|28;28;1|] *)
+    (* MLP *)
+(*     |> flatten 
+    |> linear 256 ~act_typ:Activation.Tanh
+    |> linear 128 ~act_typ:Activation.Relu
+    |> linear 10 ~act_typ:Activation.Softmax
+    |> get_network *)
+
+(*     |> conv2d [|3;3;1;32|] [|1;1|] ~act_typ:Activation.Relu
+    |> conv2d [|3;3;32;64|] [|1;1|] ~act_typ:Activation.Relu
+    |> max_pool2d [|2;2|] [|2;2|]
+    |> dropout 0.5
+    |> flatten
+    |> linear 128 ~act_typ:Activation.Relu
+    |> normalisation
+    |> dropout 0.5
+    |> linear 10 ~act_typ:Activation.Softmax
+    |> get_network *)
+
+(*     |> lambda (fun x -> Maths.(x / F 256.))
+    |> conv2d [|5;5;1;32|] [|1;1|] ~act_typ:Activation.Relu
+    |> max_pool2d [|2;2|] [|2;2|]
+    |> dropout 0.1
+    |> fully_connected 1024 ~act_typ:Activation.Relu
+    |> linear 10 ~act_typ:Activation.Softmax
+    |> get_network *)
     input [|32;32;3|]
     |> normalisation ~decay:0.9
     |> conv2d [|3;3;3;32|] [|1;1|] ~act_typ:Activation.Relu
@@ -105,20 +133,16 @@ let test_neural_parallel () =
   in
 
   let x, _, y = Owl.Dataset.load_cifar_train_data 1 in
+  (* let x, _, y = Owl.Dataset.load_mnist_train_data_arr () in *)
+
   (*
   let params = Params.config
     ~batch:(Batch.Mini 100) ~learning_rate:(Learning_Rate.Adagrad 0.002) 0.05 in
   *)
-  let chkpt state =
-    if Checkpoint.(state.current_batch mod 1 = 0) then (
-      Checkpoint.(state.stop <- true);
-      (* Log.info "sync model with server" *)
-    )
-  in
 
   let params = Params.config
-    ~batch:(Batch.Sample 100) ~learning_rate:(Learning_Rate.Adagrad 0.001)
-    ~checkpoint:(Checkpoint.Custom chkpt) ~stopping:(Stopping.Const 1e-6) 10.
+    ~batch:(Batch.Sample 100) ~learning_rate:(Learning_Rate.Adagrad (0.001))
+    ~stopping:(Stopping.Const 1e-6) 10.
   in
   let url = Actor_config.manager_addr in
   let jid = Sys.argv.(1) in
