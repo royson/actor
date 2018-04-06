@@ -52,7 +52,6 @@ type param_context = {
   mutable workers     : [`Dealer] ZMQ.Socket.t StrMap.t;  (* socket of workers or peers *)
   mutable step        : int;                              (* local step for barrier control *)
   mutable stale       : int;                              (* staleness variable for barrier control *)
-  mutable finish      : bool;                             (* to indicate if server is done with job*)
   mutable worker_busy : (string, int) Hashtbl.t;          (* lookup table of a worker busy or not *)
   mutable worker_step : (string, int) Hashtbl.t;          (* lookup table of a worker's step *)
   mutable step_worker : (int, string) Hashtbl.t;          (* lookup table of workers at a specific step *)
@@ -93,9 +92,9 @@ type service_rec = {
 
 type ('a, 'b, 'c) ps_schedule_typ = 'a list -> ('a * ('b * 'c) list) list
 
-type ('a, 'b, 'c, 'd) ps_pull_typ = ('a * ('b * 'c)) list -> ('a * 'd) list
+type ('a, 'b, 'c, 'd, 'e) ps_pull_typ = ('a * ('b * 'c * 'e)) list -> ('a * 'd) list
 
-type ('a, 'b, 'c, 'd, 'e) ps_push_typ = 'a -> ('b * 'c) list -> ('b * ('d * 'e)) list
+type ('a, 'b, 'c, 'd, 'e, 'f) ps_push_typ = 'a -> ('b * 'c) list -> ('b * ('d * 'e * 'f)) list
 
 type ps_barrier_typ = param_context ref -> int * (string list)
 
