@@ -20,7 +20,7 @@ val start : ?barrier:barrier -> string -> string -> unit
 val register_barrier : ps_barrier_typ -> unit
 (** register user-defined barrier function at p2p server *)
 
-val register_schedule : ('a, 'b, 'c) ps_schedule_typ -> unit
+val register_schedule : ('a, 'b, 'c, 'd) ps_schedule_typ -> unit
 (** register user-defined scheduler *)
 
 val register_pull : ('a, 'b, 'c, 'd) ps_pull_typ -> unit
