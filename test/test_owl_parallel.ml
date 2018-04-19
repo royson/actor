@@ -91,13 +91,12 @@ let test_neural_parallel () =
   let open Graph in
   (* let open Owl.Plot in *)
   let nn =
-    (* input [|28;28;1|] *)
-    (* MLP *)
-(*     |> flatten 
+    input [|28;28;1|]
+    |> flatten 
     |> linear 256 ~act_typ:Activation.Tanh
     |> linear 128 ~act_typ:Activation.Relu
     |> linear 10 ~act_typ:Activation.Softmax
-    |> get_network *)
+    |> get_network
 
 (*     |> conv2d [|3;3;1;32|] [|1;1|] ~act_typ:Activation.Relu
     |> conv2d [|3;3;32;64|] [|1;1|] ~act_typ:Activation.Relu
@@ -117,7 +116,7 @@ let test_neural_parallel () =
     |> fully_connected 1024 ~act_typ:Activation.Relu
     |> linear 10 ~act_typ:Activation.Softmax
     |> get_network *)
-    input [|32;32;3|]
+(*     input [|32;32;3|]
     |> normalisation ~decay:0.9
     |> conv2d [|3;3;3;32|] [|1;1|] ~act_typ:Activation.Relu
     |> conv2d [|3;3;32;32|] [|1;1|] ~act_typ:Activation.Relu ~padding:VALID
@@ -129,11 +128,12 @@ let test_neural_parallel () =
     |> dropout 0.1
     |> fully_connected 512 ~act_typ:Activation.Relu
     |> linear 10 ~act_typ:Activation.Softmax
-    |> get_network
+    |> get_network *)
   in
 
-  let x, _, y = Owl.Dataset.load_cifar_train_data 1 in
-  (* let x, _, y = Owl.Dataset.load_mnist_train_data_arr () in *)
+  (* let x, _, y = Owl.Dataset.load_cifar_train_data 1 in *)
+  let x, _, y = Owl.Dataset.load_mnist_train_data_arr () in
+  let tx, _, ty = Owl.Dataset.load_mnist_test_data_arr () in
 
   (*
   let params = Params.config
@@ -141,13 +141,12 @@ let test_neural_parallel () =
   *)
 
   let params = Params.config
-    ~batch:(Batch.Sample 100) ~learning_rate:(Learning_Rate.AdaDelay (0.005))
-    ~stopping:(Stopping.Const 1e-6) 50.0
+    ~batch:(Batch.Sample 100) ~learning_rate:(Learning_Rate.Adagrad (0.001))
+    ~stopping:(Stopping.Const 1e-6) 1.0
   in
   let url = Actor_config.manager_addr in
   let jid = Sys.argv.(1) in
-  M2.train ~params nn x y jid url
-
+  M2.train ~params nn x y tx ty jid url
 
 module M1 = Owl_parallel.Make_Distributed (Owl.Dense.Ndarray.D) (Actor.Mapre)
 let test_owl_distributed () =
