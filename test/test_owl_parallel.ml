@@ -142,8 +142,8 @@ let test_neural_parallel () =
   *)
 
   let params = Params.config
-    ~batch:(Batch.Mini 128) ~learning_rate:(Learning_Rate.Adagrad (0.001))
-    ~stopping:(Stopping.Const 1e-6) 50.0
+    ~batch:(Batch.Mini 128) ~learning_rate:(Learning_Rate.DelayComp (0.005,2.0,0.95))
+    ~stopping:(Stopping.Const 1e-6) 120.0
   in
   let url = Actor_config.manager_addr in
   let jid = Sys.argv.(1) in
