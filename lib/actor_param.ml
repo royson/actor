@@ -3,16 +3,17 @@
 open Actor_types
 
 type param_context = Actor_types.param_context
-type barrier = ASP | BSP | SSP | PSP
+type barrier = ASP | PASP | BSP | SSP | PSP
 
 let start ?barrier jid url =
   (* reset the barrier control if specifed *)
   let _barrier_str = match barrier with
-    | Some ASP -> Marshal.to_string Actor_barrier.param_asp [ Marshal.Closures ]
-    | Some BSP -> Marshal.to_string Actor_barrier.param_bsp [ Marshal.Closures ]
-    | Some SSP -> Marshal.to_string Actor_barrier.param_ssp [ Marshal.Closures ]
-    | Some PSP -> failwith "actor_param:start:psp"
-    | None     -> Actor_paramserver.(!_barrier)
+    | Some ASP  -> Marshal.to_string Actor_barrier.param_asp [ Marshal.Closures ]
+    | Some PASP -> Marshal.to_string Actor_barrier.param_pasp [ Marshal.Closures ]
+    | Some BSP  -> Marshal.to_string Actor_barrier.param_bsp [ Marshal.Closures ]
+    | Some SSP  -> Marshal.to_string Actor_barrier.param_ssp [ Marshal.Closures ]
+    | Some PSP  -> failwith "actor_param:start:psp"
+    | None      -> Actor_paramserver.(!_barrier)
   in
   Actor_paramserver._barrier := _barrier_str;
   (* start preparing communication context *)
@@ -67,3 +68,8 @@ let worker_num () =
   match Actor_paramserver.(!_context.job_id) = "" with
   | true  -> failwith "actor_param:worker_num"
   | false -> StrMap.cardinal Actor_paramserver.(!_context.workers)
+
+let update_progressive () =
+  match Actor_paramserver.(!_context.job_id) = "" with
+    | true  -> failwith "actor_param:worker_num"
+    | false -> Actor_paramserver.(update_progressive ())

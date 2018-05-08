@@ -63,6 +63,22 @@ let param_ssp _context =
 (* Param barrier: Asynchronous parallel *)
 let param_asp _context = !_context.stale <- max_int; param_ssp _context
 
+(* Param barrier: Progressive Asynchronous parallel *)
+(* Ignores context_step as it is not needed in async *)
+let param_pasp _context = 
+  let filled = ref 0 in
+  let l = Hashtbl.fold (fun w b l ->
+    match (b = 1) with
+    | true -> filled := !filled + 1;
+              l
+    | false -> 
+      (match (((List.length l) + !filled) < !_context.progressive) with
+      | true  -> l @ [ w ]
+      | false -> l)
+  ) !_context.worker_busy []
+  in (!_context.step, l)
+
+
 (* P2P barrier : Bulk synchronous parallel
    this one waits for the slowest one to catch up. *)
 let p2p_bsp _context =

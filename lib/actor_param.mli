@@ -7,6 +7,7 @@ type param_context = Actor_types.param_context
 
 type barrier =
   | ASP    (* Asynchronous Parallel *)
+  | PASP   (* Progressive Asynchronous Parallel *)
   | BSP    (* Bulk Synchronous Parallel *)
   | SSP    (* Stale Synchronous Parallel *)
   | PSP    (* Probabilistic Synchronous Parallel *)
@@ -39,7 +40,10 @@ val set : 'a -> 'b -> unit
 (** given a key, set its value at master *)
 
 val keys : unit -> 'a list
-(** FIXME: reture all the keys in a parameter server *)
+(** FIXME: return all the keys in a parameter server *)
 
 val worker_num : unit -> int
-(** return the number of workders, only work at server side *)
+(** return the number of workers, only work at server side *)
+
+val update_progressive : unit -> unit
+(** update progressive for PASP, only work at server side *)

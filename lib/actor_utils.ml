@@ -73,6 +73,7 @@ let empty_param_context () =
     master_sock = ZMQ.Socket.(create ztx dealer);
     myself_sock = ZMQ.Socket.(create ztx router);
     workers     = StrMap.empty;
+    progressive = 2;
     step        = 0;
     stale       = 1;
     worker_busy = Hashtbl.create 1_000;
