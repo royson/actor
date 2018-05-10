@@ -45,7 +45,7 @@ let _set k v t =
 
 let add_workers i =
   let num_worker = StrMap.cardinal !_context.workers in
-  let res = !_context.progressive = num_worker in
+  let res = !_context.progressive <> num_worker in
   let _ = match (!_context.progressive * i) > num_worker with
   | true  -> !_context.progressive <- num_worker
   | false -> !_context.progressive <- !_context.progressive * i
@@ -53,12 +53,13 @@ let add_workers i =
   res
 
 let remove_workers i = 
-  assert ((!_context.progressive / i) >= 1);
   let num_worker = StrMap.cardinal !_context.workers in
-  match (!_context.progressive / i) > num_worker with
+  let res = (!_context.progressive / i) >= 1 in
+  let _ = match (!_context.progressive / i) > num_worker with
   | true  -> !_context.progressive <- num_worker
   | false -> !_context.progressive <- !_context.progressive / i
-  
+  in
+  res
 
 let _broadcast_all t s =
   StrMap.iter (fun _k v -> Actor_utils.send ~bar:!_context.step v t s) !_context.workers;
