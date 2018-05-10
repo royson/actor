@@ -69,7 +69,12 @@ let worker_num () =
   | true  -> failwith "actor_param:worker_num"
   | false -> StrMap.cardinal Actor_paramserver.(!_context.workers)
 
-let update_progressive () =
+let add_workers i =
   match Actor_paramserver.(!_context.job_id) = "" with
     | true  -> failwith "actor_param:worker_num"
-    | false -> Actor_paramserver.(update_progressive ())
+    | false -> Actor_paramserver.(add_workers i)
+
+let remove_workers i =
+  match Actor_paramserver.(!_context.job_id) = "" with
+    | true  -> failwith "actor_param:worker_num"
+    | false -> Actor_paramserver.(remove_workers i)

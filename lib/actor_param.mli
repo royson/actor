@@ -45,5 +45,8 @@ val keys : unit -> 'a list
 val worker_num : unit -> int
 (** return the number of workers, only work at server side *)
 
-val update_progressive : unit -> unit
-(** update progressive for PASP, only work at server side *)
+val add_workers : int -> bool
+(** add workers by a magnitude of i, only work at server side *)
+
+val remove_workers : int -> unit
+(** remove workers by a magnitude of i, only work at server side *)
