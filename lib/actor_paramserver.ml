@@ -46,18 +46,18 @@ let _set k v t =
 let add_workers i =
   let num_worker = StrMap.cardinal !_context.workers in
   let res = !_context.progressive <> num_worker in
-  let _ = match (!_context.progressive * i) > num_worker with
+  let _ = match (!_context.progressive + i) > num_worker with
   | true  -> !_context.progressive <- num_worker
-  | false -> !_context.progressive <- !_context.progressive * i
+  | false -> !_context.progressive <- !_context.progressive + i
   in
   res
 
 let remove_workers i = 
-  let num_worker = StrMap.cardinal !_context.workers in
-  let res = (!_context.progressive / i) >= 1 in
-  let _ = match (!_context.progressive / i) > num_worker with
-  | true  -> !_context.progressive <- num_worker
-  | false -> !_context.progressive <- !_context.progressive / i
+  (* Minimum of 2 workers required *)
+  let res = !_context.progressive <> 2 in
+  let _ = match (!_context.progressive - i) <= 1 with
+  | true  -> !_context.progressive <- 2
+  | false -> !_context.progressive <- !_context.progressive - i
   in
   res
 

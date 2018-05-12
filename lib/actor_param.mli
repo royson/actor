@@ -49,7 +49,7 @@ val progressive_num : unit -> int
 (** return the number of workers in PASP, only work at server side *)
 
 val add_workers : int -> bool
-(** add workers by a magnitude, only work at server side *)
+(** add workers in PASP, only work at server side *)
 
 val remove_workers : int -> bool
-(** remove workers by a magnitude, only work at server side *)
+(** remove workers in PASP, only work at server side *)
