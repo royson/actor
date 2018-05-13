@@ -72,7 +72,7 @@ let terminate () =
 let service_loop () =
   Actor_logger.debug "parameter server @ %s" !_context.myself_addr;
   (* unmarshal the schedule and pull functions *)
-  let schedule : ('a, 'b, 'c, 'd) ps_schedule_typ = Marshal.from_string !_schedule 0 in
+  let schedule : ('a, 'b, 'c, 'd, 'e) ps_schedule_typ = Marshal.from_string !_schedule 0 in
   let pull : ('a, 'b, 'c, 'd) ps_pull_typ = Marshal.from_string !_pull 0 in
   let barrier : ps_barrier_typ = Marshal.from_string !_barrier 0 in
   let stop : ps_stop_typ = Marshal.from_string !_stop 0 in

@@ -91,7 +91,7 @@ type service_rec = {
 
 (** types of user-defined functions in model parallel module *)
 
-type ('a, 'b, 'c, 'd) ps_schedule_typ = 'a list -> ('a * ('b * ('c * 'd)) list) list
+type ('a, 'b, 'c, 'd, 'e) ps_schedule_typ = 'a list -> ('a * ('b * ('c * 'd * 'e)) list) list
 
 type ('a, 'b, 'c, 'd) ps_pull_typ = string -> ('a * ('b * 'c)) list -> ('a * 'd) list
 

@@ -40,7 +40,7 @@ let start ?barrier jid url =
 let register_barrier (f : ps_barrier_typ) =
   Actor_paramserver._barrier := Marshal.to_string f [ Marshal.Closures ]
 
-let register_schedule (f : ('a, 'b, 'c, 'd) ps_schedule_typ) =
+let register_schedule (f : ('a, 'b, 'c, 'd, 'e) ps_schedule_typ) =
   Actor_paramserver._schedule := Marshal.to_string f [ Marshal.Closures ]
 
 let register_pull (f : ('a, 'b, 'c, 'd) ps_pull_typ) =
