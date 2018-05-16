@@ -37,11 +37,8 @@ let service_loop () =
     | PS_Schedule -> (
       Actor_logger.debug "%s: ps_schedule" !_context.myself_addr;
       !_context.step <- (if t > !_context.step then t else !_context.step);
-      Actor_logger.debug "Increase context step";
       let vars = Marshal.from_string m.par.(0) 0 in
-      Actor_logger.debug "vars";
       let updates = push !_context.myself_addr vars in
-      Actor_logger.debug "updates";
       update_param updates t
       )
     | Terminate -> (
