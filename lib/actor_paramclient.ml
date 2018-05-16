@@ -50,7 +50,6 @@ let service_loop () =
     | _ -> ( Actor_logger.debug "unknown mssage to PS" )
   done with Failure e -> (
     Actor_logger.warn "%s" e;
-    Actor_logger.warn "OMG";
     ZMQ.Socket.close !_context.myself_sock;
     Pervasives.exit 0 )
 
