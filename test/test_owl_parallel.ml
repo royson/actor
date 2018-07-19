@@ -116,7 +116,7 @@ let test_neural_parallel () =
     |> fully_connected 1024 ~act_typ:Activation.Relu
     |> linear 10 ~act_typ:Activation.Softmax
     |> get_network *)
-    input [|32;32;3|]
+(*     input [|32;32;3|]
     |> normalisation ~decay:0.9
     |> conv2d [|3;3;3;32|] [|1;1|] ~act_typ:Activation.Relu
     |> conv2d [|3;3;32;32|] [|1;1|] ~act_typ:Activation.Relu ~padding:VALID
@@ -128,10 +128,51 @@ let test_neural_parallel () =
     |> dropout 0.1
     |> fully_connected 512 ~act_typ:Activation.Relu
     |> linear 10 ~act_typ:Activation.(Softmax 1)
+    |> get_network *)
+    input [|32;32;3|]
+    |> conv2d [|3;3;3;48|] [|1;1|] ~act_typ:Activation.Relu
+    (* |> normalisation *)
+    |> conv2d [|3;3;48;48|] [|1;1|] ~act_typ:Activation.Relu
+    (* |> normalisation *)
+    |> max_pool2d [|2;2|] [|2;2|] ~padding:VALID
+    |> dropout 0.25 
+    |> conv2d [|3;3;48;96|] [|1;1|] ~act_typ:Activation.Relu
+    (* |> normalisation *)
+    |> conv2d [|3;3;96;96|] [|1;1|] ~act_typ:Activation.Relu
+    (* |> normalisation *)
+    |> max_pool2d [|2;2|] [|2;2|] ~padding:VALID
+    |> dropout 0.25 
+    |> conv2d [|3;3;96;192|] [|1;1|] ~act_typ:Activation.Relu
+    (* |> normalisation *)
+    |> conv2d [|3;3;192;192|] [|1;1|] ~act_typ:Activation.Relu
+    (* |> normalisation *)
+    |> max_pool2d [|2;2|] [|2;2|] ~padding:VALID
+    |> dropout 0.25 
+    |> fully_connected 512 ~act_typ:Activation.Relu
+    (* |> normalisation *)
+    |> dropout 0.5
+    |> fully_connected 256 ~act_typ:Activation.Relu
+    (* |> normalisation *)
+    |> dropout 0.5
+    |> linear 10 ~act_typ:Activation.(Softmax 1)
     |> get_network
   in
 
-  let x, _, y = Owl.Dataset.load_cifar_train_data 1 in
+  let x1, _, y1 = Owl.Dataset.load_cifar_train_data 1 in
+  let x2, _, y2 = Owl.Dataset.load_cifar_train_data 2 in
+  let x3, _, y3 = Owl.Dataset.load_cifar_train_data 3 in
+  let x4, _, y4 = Owl.Dataset.load_cifar_train_data 4 in
+  let x5, _, y5 = Owl.Dataset.load_cifar_train_data 5 in
+  let y = Owl.Dense.Matrix.S.concat_vertical y1 y2 in
+  let y = Owl.Dense.Matrix.S.concat_vertical y y3 in
+  let y = Owl.Dense.Matrix.S.concat_vertical y y4 in
+  let y = Owl.Dense.Matrix.S.concat_vertical y y5 in
+  let y = Owl.Algodiff.S.pack_arr y in
+  let x = Owl.Dense.Matrix.S.concat_vertical x1 x2 in
+  let x = Owl.Dense.Matrix.S.concat_vertical x x3 in
+  let x = Owl.Dense.Matrix.S.concat_vertical x x4 in
+  let x = Owl.Dense.Matrix.S.concat_vertical x x5 in
+  let x = Owl.Algodiff.S.pack_arr x in
   let tx, _, ty = Owl.Dataset.load_cifar_test_data () in
   (* let x, _, y = Owl.Dataset.load_mnist_train_data_arr () in *)
   (* let tx, _, ty = Owl.Dataset.load_mnist_test_data_arr () in *)
@@ -143,7 +184,7 @@ let test_neural_parallel () =
 
   let params = Params.config
     ~batch:(Batch.Mini 128) ~learning_rate:(Learning_Rate.Adagrad 0.001)
-    ~stopping:(Stopping.Const 1e-2) 150.0
+    ~stopping:(Stopping.Const 1e-2) 200.0
   in
   let url = Actor_config.manager_addr in
   let jid = Sys.argv.(1) in
